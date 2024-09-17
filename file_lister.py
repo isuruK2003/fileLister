@@ -1,5 +1,6 @@
 import os
 import json
+import sys
 
 unpermitted_dirs = []
 
@@ -15,44 +16,41 @@ def listDir(dir_path):
         unpermitted_dirs.append(dir_name)
         return {dir_name: []}
 
-
 def save(data, filename="output.json"):
     if input("Save data? [Y/n]: ").lower() in ["no", "n"]:
         print("Stopped saving data")
         return
 
     with open(filename, "w") as file:
-        json.dump(data, file, indent = 2)
+        json.dump(data, file, indent=2)
 
     print("Data saved to", filename)
 
-
 def main():
-    try: 
-        directory = input("Enter the directory path: ").replace("\\", "/")
-    
-        if not directory:
-            print("Current directory will be used")
-            directory = os.getcwd()
+    try:
+        # Check if a command-line argument is provided
+        if len(sys.argv) > 1:
+            directory = sys.argv[1].replace("\\", "/")
+        else:
+            # Ask the user whether to use the current directory
+            use_current = input("No directory argument provided. Use the current directory? [Y/n]: ").lower()
+            if use_current in ["no", "n"]:
+                directory = input("Please provide a directory path: ").replace("\\", "/")
+            else:
+                directory = os.getcwd()
 
-        if not os.path.isdir(directory):
-            print("Directory path does not point to a directory")
-            return
-
-        tree = listDir(directory)
-
-        print(tree)
+        dir_structure = listDir(directory)
+        print(json.dumps(dir_structure, indent=2))
 
         if unpermitted_dirs:
-            print("\nThese directories were not permitted to open:")
-            print("\n".join(unpermitted_dirs), "\n")
-        
-        output_filename = directory.lower().replace("/", "_").replace(":", "_") + ".json"
+            print("\nWarning: Permission denied for the following directories:")
+            for dir_name in unpermitted_dirs:
+                print(f"- {dir_name}")
 
-        save(tree, f"data/{output_filename}")
+        save(dir_structure)
 
-    except KeyboardInterrupt:
-        print("\nProgram aborted!")
+    except Exception as e:
+        print(f"An uncaught error occurred: {e}")
 
 if __name__ == "__main__":
     main()
