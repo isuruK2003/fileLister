@@ -1,5 +1,5 @@
 # fileLister
-Python code to recursively list all the filenames and folder names of a file system and saves the information in JSON format.
+Python code to recursively list all the filenames and directory names of the file system starting from a given directory, and saves the information as a JSON file.
 
 Usage:
     ```
